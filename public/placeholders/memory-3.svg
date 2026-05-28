@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-label="照片占位图三">
+  <defs>
+    <linearGradient id="g" x1="0" x2="1" y1="1" y2="0">
+      <stop stop-color="#ffd6e8"/>
+      <stop offset="1" stop-color="#fff8dc"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#g)"/>
+  <circle cx="270" cy="230" r="86" fill="#fff" opacity=".54"/>
+  <circle cx="530" cy="230" r="86" fill="#fff" opacity=".54"/>
+  <path d="M280 352c72 70 168 70 240 0" fill="none" stroke="#d7427c" stroke-width="18" stroke-linecap="round"/>
+  <text x="400" y="475" text-anchor="middle" fill="#a23d64" font-family="Arial, sans-serif" font-size="42" font-weight="700">照片占位</text>
+</svg>

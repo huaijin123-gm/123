@@ -1,0 +1,163 @@
+@import "tailwindcss";
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background: #fff7fb;
+  font-family:
+    Inter, "Noto Sans SC", "Microsoft YaHei", system-ui, -apple-system,
+    BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.hero-scene {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 247, 251, 0.88) 86%, #fff7fb 100%),
+    linear-gradient(112deg, #ff4f9a 0%, #ff7fbc 24%, #ff9f74 48%, #ffd36a 64%, #b987ff 84%, #fff0fb 100%);
+}
+
+.hero-scene::before,
+.hero-scene::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+}
+
+.hero-scene::before {
+  background-image:
+    linear-gradient(120deg, transparent 0 16%, rgba(255, 255, 255, 0.24) 22%, transparent 32%),
+    linear-gradient(145deg, transparent 0 54%, rgba(255, 255, 255, 0.2) 62%, transparent 72%);
+  opacity: 0.8;
+}
+
+.hero-scene::after {
+  background-image:
+    radial-gradient(circle, rgba(185, 55, 120, 0.2) 0 1.5px, transparent 1.5px),
+    radial-gradient(circle, rgba(255, 255, 255, 0.72) 0 2px, transparent 2px);
+  background-position:
+    0 0,
+    34px 46px;
+  background-size:
+    86px 86px,
+    120px 120px;
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.7), transparent 78%);
+  animation: float-scene 10s ease-in-out infinite alternate;
+  opacity: 0.75;
+}
+
+.hero-badge {
+  border: 1px solid rgba(255, 255, 255, 0.76);
+  background: rgba(255, 255, 255, 0.68);
+  color: #8b3561;
+  box-shadow: 0 14px 34px rgba(204, 44, 115, 0.22);
+  backdrop-filter: blur(16px);
+}
+
+.hero-primary-link {
+  background: linear-gradient(135deg, #ff2f86 0%, #e94683 45%, #b85cff 100%);
+  box-shadow: 0 20px 42px rgba(218, 43, 125, 0.4);
+}
+
+.hero-primary-link:hover {
+  background: linear-gradient(135deg, #ff1f7c 0%, #df3477 45%, #a94cff 100%);
+}
+
+.hero-secondary-link {
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  background: rgba(255, 255, 255, 0.64);
+  color: #9a3869;
+  box-shadow: 0 13px 30px rgba(176, 64, 135, 0.18);
+  backdrop-filter: blur(16px);
+}
+
+.hero-secondary-link:hover,
+.hero-scroll-link:hover {
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.hero-scroll-link {
+  background: rgba(255, 255, 255, 0.64);
+  color: #b63672;
+  box-shadow: 0 15px 34px rgba(176, 64, 135, 0.22);
+  backdrop-filter: blur(16px);
+}
+
+.editable-surface {
+  outline: 2px dashed rgba(233, 70, 131, 0.28);
+  outline-offset: 4px;
+}
+
+.inline-edit-field {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid rgba(233, 70, 131, 0.24);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.72);
+  color: inherit;
+  font: inherit;
+  line-height: inherit;
+  outline: none;
+  padding: 0.28rem 0.5rem;
+  box-shadow: 0 8px 24px rgba(206, 80, 128, 0.08);
+}
+
+textarea.inline-edit-field {
+  display: block;
+  min-height: 6.5rem;
+  resize: vertical;
+}
+
+.inline-edit-field:focus {
+  border-color: rgba(233, 70, 131, 0.75);
+  background: #fff;
+  box-shadow: 0 0 0 4px rgba(233, 70, 131, 0.12);
+}
+
+.reveal-card {
+  animation: reveal-card 680ms ease both;
+}
+
+@keyframes reveal-card {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float-scene {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+
+  to {
+    transform: translate3d(0, -16px, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
