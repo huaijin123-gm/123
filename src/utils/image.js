@@ -25,3 +25,29 @@ export function resizeImage(file) {
     reader.readAsDataURL(file);
   });
 }
+
+export async function resizeImageFile(file) {
+  if (!file) {
+    return null;
+  }
+
+  const lowerName = file.name.toLowerCase();
+  if (
+    file.type === "image/heic" ||
+    file.type === "image/heif" ||
+    lowerName.endsWith(".heic") ||
+    lowerName.endsWith(".heif")
+  ) {
+    throw new Error("HEIC_PHOTO");
+  }
+
+  const dataUrl = await resizeImage(file);
+  const response = await fetch(dataUrl);
+  const blob = await response.blob();
+  const safeName = lowerName.replace(/\.[^.]+$/, "") || "memory-photo";
+
+  return new File([blob], `${safeName}.jpg`, {
+    type: "image/jpeg",
+    lastModified: Date.now(),
+  });
+}

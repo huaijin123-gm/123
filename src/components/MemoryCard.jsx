@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
-import { Heart, ImagePlus, Sparkle } from "lucide-react";
+import { Heart, ImagePlus, MessageCircle, Sparkle } from "lucide-react";
 import InlineEditable from "./InlineEditable";
 import { readFavorites, saveFavorites } from "../utils/storage";
 
 function MemoryCard({
+  detail,
   editMode,
   memory,
   index,
+  onOpenMemory,
   onUpdateMemory,
   onUploadMemoryImage,
 }) {
@@ -28,8 +30,14 @@ function MemoryCard({
 
   return (
     <article
+      onClick={(event) => {
+        if (editMode || event.target.closest("button, input, textarea, label")) {
+          return;
+        }
+        onOpenMemory?.(memory);
+      }}
       className={`reveal-card group relative rounded-[28px] border border-white/80 bg-white/78 p-4 shadow-[0_20px_60px_rgba(206,80,128,0.13)] backdrop-blur transition duration-300 hover:-translate-y-1 hover:shadow-[0_26px_70px_rgba(206,80,128,0.18)] md:ml-14 md:grid md:grid-cols-[240px_1fr] md:gap-6 md:p-5 ${
-        editMode ? "editable-surface" : ""
+        editMode ? "editable-surface" : "cursor-pointer"
       }`}
       style={{ animationDelay: `${index * 90}ms` }}
     >
@@ -130,6 +138,20 @@ function MemoryCard({
             {isFavorite ? "已收藏" : "收藏这一刻"}
           </button>
         </div>
+
+        {!editMode && detail && (
+          <div className="mt-4 flex flex-wrap gap-2 text-sm font-semibold text-[#9a3869]">
+            <span className="inline-flex items-center gap-1 rounded-full bg-[#fff0f6] px-3 py-1">
+              <MessageCircle size={14} />
+              {detail.comments?.length || 0}
+            </span>
+            {detail.reactionCounts?.map((item) => (
+              <span key={item.emoji} className="rounded-full bg-[#fff0f6] px-3 py-1">
+                {item.emoji} {item.count}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
     </article>
   );

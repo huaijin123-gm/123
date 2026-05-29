@@ -4,8 +4,10 @@ import MemoryCard from "./MemoryCard";
 
 function MemoryTimeline({
   editMode,
+  detailByMemoryId = {},
   memories,
   onAddMemory,
+  onOpenMemory,
   onUpdateMemory,
   onUploadMemoryImage,
 }) {
@@ -66,8 +68,10 @@ function MemoryTimeline({
               <MemoryCard
                 key={memory.id}
                 editMode={editMode}
+                detail={detailByMemoryId[memory.id]}
                 memory={memory}
                 index={index}
+                onOpenMemory={onOpenMemory}
                 onUpdateMemory={onUpdateMemory}
                 onUploadMemoryImage={onUploadMemoryImage}
               />

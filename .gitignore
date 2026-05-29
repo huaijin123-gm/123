@@ -1,4 +1,8 @@
 node_modules
 dist
 server/data
+.vercel
+.env
+.env.local
+.env.*.local
 *.log
