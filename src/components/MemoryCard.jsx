@@ -11,8 +11,10 @@ function MemoryCard({
   onOpenMemory,
   onUpdateMemory,
   onUploadMemoryImage,
+  uploadState,
 }) {
   const [isFavorite, setIsFavorite] = useState(false);
+  const isUploading = uploadState?.memoryId === memory.id;
 
   useEffect(() => {
     setIsFavorite(readFavorites().includes(memory.id));
@@ -48,18 +50,22 @@ function MemoryCard({
           <img
             src={memory.image}
             alt=""
+            loading="lazy"
             className="aspect-[4/3] h-full w-full object-cover transition duration-500 group-hover:scale-105"
           />
           <span className="absolute inset-x-4 bottom-4 inline-flex items-center justify-center gap-2 rounded-full bg-white/82 px-4 py-2 text-sm font-semibold text-[#bd3d6c] shadow-lg backdrop-blur">
             <ImagePlus size={16} />
-            点照片上传
+            {isUploading
+              ? `上传 ${uploadState.current}/${uploadState.total}`
+              : "点照片上传"}
           </span>
           <input
             type="file"
             accept="image/*"
+            multiple
             className="hidden"
             onChange={(event) =>
-              onUploadMemoryImage(memory.id, event.target.files?.[0])
+              onUploadMemoryImage(memory.id, event.target.files)
             }
           />
         </label>
@@ -68,6 +74,7 @@ function MemoryCard({
           <img
             src={memory.image}
             alt=""
+            loading="lazy"
             className="aspect-[4/3] h-full w-full object-cover transition duration-500 group-hover:scale-105"
           />
         </div>

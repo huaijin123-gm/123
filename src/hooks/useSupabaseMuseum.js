@@ -8,6 +8,7 @@ const REACTION_EMOJIS = ["❤️", "🥺", "🫂", "😂"];
 export function useSupabaseMuseum(defaultContent) {
   const [session, setSession] = useState(null);
   const [authLoading, setAuthLoading] = useState(hasSupabaseConfig);
+  const [authNotice, setAuthNotice] = useState("");
   const [museum, setMuseum] = useState(null);
   const [role, setRole] = useState(null);
   const [members, setMembers] = useState([]);
@@ -19,13 +20,14 @@ export function useSupabaseMuseum(defaultContent) {
   const [notice, setNotice] = useState("");
   const [loadingMuseum, setLoadingMuseum] = useState(false);
   const [inviteLink, setInviteLink] = useState("");
-  const currentMuseumId = useRef(null);
+  const [uploadState, setUploadState] = useState(null);
+  const latestLoadId = useRef(0);
 
   const userId = session?.user?.id;
 
   const showNotice = useCallback((message) => {
     setNotice(message);
-    window.setTimeout(() => setNotice(""), 2400);
+    window.setTimeout(() => setNotice(""), 2600);
   }, []);
 
   useEffect(() => {
@@ -34,19 +36,39 @@ export function useSupabaseMuseum(defaultContent) {
       return undefined;
     }
 
+    const params = new URLSearchParams(window.location.search);
+    const authError = params.get("error_code") || params.get("error");
+    if (authError) {
+      setAuthNotice("旧登录链接已经失效，请改用 6 位验证码进入。");
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+
     let active = true;
 
-    supabase.auth.getSession().then(({ data }) => {
+    supabase.auth.getSession().then(({ data, error }) => {
       if (!active) {
         return;
       }
+
+      if (error) {
+        setAuthNotice("登录状态已过期，请重新验证邮箱。");
+      }
+
       setSession(data.session);
       setAuthLoading(false);
     });
 
     const { data: listener } = supabase.auth.onAuthStateChange(
-      (_event, nextSession) => {
+      (event, nextSession) => {
         setSession(nextSession);
+
+        if (event === "TOKEN_REFRESHED") {
+          setAuthNotice("");
+        }
+
+        if (event === "SIGNED_OUT") {
+          setAuthNotice("登录状态已退出，需要重新验证邮箱。");
+        }
       },
     );
 
@@ -55,6 +77,25 @@ export function useSupabaseMuseum(defaultContent) {
       listener.subscription.unsubscribe();
     };
   }, []);
+
+  useEffect(() => {
+    function handleOnline() {
+      setSyncStatus("正在重新连接");
+      loadMuseum();
+    }
+
+    function handleOffline() {
+      setSyncStatus("网络断开");
+    }
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  });
 
   const loadMuseum = useCallback(async () => {
     if (!userId) {
@@ -66,8 +107,10 @@ export function useSupabaseMuseum(defaultContent) {
       return;
     }
 
+    const loadId = latestLoadId.current + 1;
+    latestLoadId.current = loadId;
     setLoadingMuseum(true);
-    setSyncStatus("正在同步");
+    setSyncStatus(navigator.onLine ? "正在同步" : "网络断开");
 
     const { data: memberRows, error: memberError } = await supabase
       .from("museum_members")
@@ -75,16 +118,19 @@ export function useSupabaseMuseum(defaultContent) {
       .eq("user_id", userId)
       .limit(1);
 
+    if (latestLoadId.current !== loadId) {
+      return;
+    }
+
     if (memberError) {
       setSyncStatus("同步失败");
       setLoadingMuseum(false);
-      showNotice("没有连上我们的云端博物馆，请稍后再试");
+      showNotice("云端数据读取失败，请稍后再试");
       return;
     }
 
     const membership = memberRows?.[0];
     if (!membership) {
-      currentMuseumId.current = null;
       setMuseum(null);
       setRole(null);
       setMembers([]);
@@ -96,7 +142,6 @@ export function useSupabaseMuseum(defaultContent) {
     }
 
     const museumId = membership.museum_id;
-    currentMuseumId.current = museumId;
     setMuseum(membership.museums);
     setRole(membership.role);
 
@@ -134,6 +179,10 @@ export function useSupabaseMuseum(defaultContent) {
         .order("created_at", { ascending: false }),
     ]);
 
+    if (latestLoadId.current !== loadId) {
+      return;
+    }
+
     const failed = [
       membersResult,
       memoriesResult,
@@ -145,7 +194,7 @@ export function useSupabaseMuseum(defaultContent) {
     if (failed) {
       setSyncStatus("同步失败");
       setLoadingMuseum(false);
-      showNotice("云端数据读取失败，我保留了当前页面");
+      showNotice("云端同步失败，请点右下角重新同步");
       return;
     }
 
@@ -204,8 +253,13 @@ export function useSupabaseMuseum(defaultContent) {
         if (status === "SUBSCRIBED") {
           setSyncStatus("实时同步中");
         }
-        if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
-          setSyncStatus("正在重新连接");
+
+        if (
+          status === "CHANNEL_ERROR" ||
+          status === "TIMED_OUT" ||
+          status === "CLOSED"
+        ) {
+          setSyncStatus(navigator.onLine ? "正在重连" : "网络断开");
         }
       });
 
@@ -241,12 +295,13 @@ export function useSupabaseMuseum(defaultContent) {
     );
   }, [comments, memories, reactions, userId]);
 
-  async function signIn(email) {
-    setSyncStatus("正在发送钥匙");
+  async function requestEmailOtp(email) {
+    setAuthNotice("");
+    setSyncStatus("正在发送验证码");
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: window.location.origin,
+        shouldCreateUser: true,
       },
     });
 
@@ -255,7 +310,27 @@ export function useSupabaseMuseum(defaultContent) {
       throw error;
     }
 
-    setSyncStatus("请查收邮箱");
+    setSyncStatus("请查收验证码");
+    setAuthNotice("验证码已发送，输入邮件里的 6 位数字。");
+  }
+
+  async function verifyEmailOtp(email, token) {
+    setSyncStatus("正在验证");
+    const { data, error } = await supabase.auth.verifyOtp({
+      email,
+      token,
+      type: "email",
+    });
+
+    if (error) {
+      setSyncStatus("验证失败");
+      setAuthNotice("验证码无效或已过期，请重新获取。");
+      throw error;
+    }
+
+    setSession(data.session);
+    setAuthNotice("");
+    setSyncStatus("已登录");
   }
 
   async function signOut() {
@@ -274,11 +349,10 @@ export function useSupabaseMuseum(defaultContent) {
 
     if (error) {
       setSyncStatus("开馆失败");
-      showNotice("开馆失败，请确认第二段 SQL 已经运行");
+      showNotice("开馆失败，请稍后再试");
       throw error;
     }
 
-    currentMuseumId.current = data;
     await loadMuseum();
     await importDefaultContent(data);
     await loadMuseum();
@@ -360,7 +434,7 @@ export function useSupabaseMuseum(defaultContent) {
       achievement: "achievement",
     }[field];
 
-    if (!column) {
+    if (!column || !museum?.id) {
       return;
     }
 
@@ -392,50 +466,67 @@ export function useSupabaseMuseum(defaultContent) {
     setSyncStatus("已同步");
   }
 
-  async function uploadMemoryImage(memoryId, file) {
-    if (!museum?.id || !userId || !file) {
+  async function uploadMemoryImage(memoryId, fileOrFiles) {
+    const files = Array.from(fileOrFiles || []).filter(Boolean);
+    if (!museum?.id || !userId || files.length === 0) {
       return;
     }
 
-    try {
-      setSyncStatus("照片上传中");
-      const imageFile = await resizeImageFile(file);
-      const path = `${museum.id}/${memoryId}/${Date.now()}-${imageFile.name}`;
+    setUploadState({ memoryId, current: 0, total: files.length, failed: 0 });
 
-      const { error: uploadError } = await supabase.storage
-        .from(PHOTO_BUCKET)
-        .upload(path, imageFile, {
-          cacheControl: "3600",
-          upsert: false,
-          contentType: imageFile.type,
+    let failed = 0;
+    for (const [index, file] of files.entries()) {
+      try {
+        setSyncStatus(`照片上传中 ${index + 1}/${files.length}`);
+        setUploadState({
+          memoryId,
+          current: index + 1,
+          total: files.length,
+          failed,
         });
 
-      if (uploadError) {
-        throw uploadError;
+        const imageFile = await resizeImageFile(file);
+        const path = `${museum.id}/${memoryId}/${Date.now()}-${index}-${imageFile.name}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from(PHOTO_BUCKET)
+          .upload(path, imageFile, {
+            cacheControl: "3600",
+            upsert: false,
+            contentType: imageFile.type,
+          });
+
+        if (uploadError) {
+          throw uploadError;
+        }
+
+        const { error: photoError } = await supabase.from("memory_photos").insert({
+          museum_id: museum.id,
+          memory_id: memoryId,
+          storage_path: path,
+          uploaded_by: userId,
+        });
+
+        if (photoError) {
+          throw photoError;
+        }
+      } catch {
+        failed += 1;
       }
+    }
 
-      const { error: photoError } = await supabase.from("memory_photos").insert({
-        museum_id: museum.id,
-        memory_id: memoryId,
-        storage_path: path,
-        uploaded_by: userId,
-      });
+    setUploadState({ memoryId, current: files.length, total: files.length, failed });
 
-      if (photoError) {
-        throw photoError;
-      }
-
+    if (failed) {
+      setSyncStatus("部分照片失败");
+      showNotice(`${failed} 张照片上传失败，可以重新选择再传一次`);
+    } else {
       setSyncStatus("照片已同步");
       showNotice("已经收藏进我们的博物馆");
-      await loadMuseum();
-    } catch (error) {
-      setSyncStatus("上传失败");
-      showNotice(
-        error.message === "HEIC_PHOTO"
-          ? "这张照片格式手机网页可能不支持，请先转成 JPG 再上传"
-          : "照片上传失败，请再试一次",
-      );
     }
+
+    await loadMuseum();
+    window.setTimeout(() => setUploadState(null), 2200);
   }
 
   async function addComment(memoryId, content) {
@@ -512,7 +603,7 @@ export function useSupabaseMuseum(defaultContent) {
 
   async function updateLetter(letterId, field, value) {
     const column = { title: "title", content: "content" }[field];
-    if (!column) {
+    if (!column || !museum?.id) {
       return;
     }
 
@@ -522,11 +613,16 @@ export function useSupabaseMuseum(defaultContent) {
       ),
     );
 
-    await supabase
+    const { error } = await supabase
       .from("letters")
       .update({ [column]: value })
       .eq("id", letterId)
       .eq("museum_id", museum.id);
+
+    if (error) {
+      showNotice("信件没有保存成功");
+      await loadMuseum();
+    }
   }
 
   async function importDefaultContent(targetMuseumId = museum?.id) {
@@ -571,6 +667,7 @@ export function useSupabaseMuseum(defaultContent) {
     configured: hasSupabaseConfig,
     session,
     authLoading,
+    authNotice,
     museum,
     role,
     members,
@@ -581,7 +678,9 @@ export function useSupabaseMuseum(defaultContent) {
     notice,
     loadingMuseum,
     inviteLink,
-    signIn,
+    uploadState,
+    requestEmailOtp,
+    verifyEmailOtp,
     signOut,
     createMuseum,
     joinMuseum,

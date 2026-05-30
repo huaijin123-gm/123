@@ -39,14 +39,7 @@ function FutureMailbox({ editMode, letters, onUpdateLetter }) {
               >
                 <div className="mb-5 flex items-center justify-between gap-3">
                   <span className="rounded-full bg-[#ffe1ed] px-3 py-1 text-sm font-semibold text-[#be3f6d]">
-                    <InlineEditable
-                      editMode={editMode}
-                      value={letter.date}
-                      onChange={(value) =>
-                        onUpdateLetter(letter.id, "date", value)
-                      }
-                      placeholder="时间标签"
-                    />
+                    {letter.date}
                   </span>
                   <button
                     type="button"

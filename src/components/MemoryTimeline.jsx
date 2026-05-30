@@ -3,13 +3,14 @@ import { Heart, Search } from "lucide-react";
 import MemoryCard from "./MemoryCard";
 
 function MemoryTimeline({
-  editMode,
   detailByMemoryId = {},
+  editMode,
   memories,
   onAddMemory,
   onOpenMemory,
   onUpdateMemory,
   onUploadMemoryImage,
+  uploadState,
 }) {
   const [activeType, setActiveType] = useState("全部");
 
@@ -47,7 +48,7 @@ function MemoryTimeline({
                   key={type}
                   type="button"
                   onClick={() => setActiveType(type)}
-                  className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition active:scale-95 ${
+                  className={`inline-flex min-h-10 items-center gap-1.5 rounded-full px-4 text-sm font-semibold transition active:scale-95 ${
                     activeType === type
                       ? "bg-[#e94683] text-white shadow-[0_10px_22px_rgba(233,70,131,0.28)]"
                       : "text-[#8d4b67] hover:bg-white"
@@ -67,20 +68,21 @@ function MemoryTimeline({
             {filteredMemories.map((memory, index) => (
               <MemoryCard
                 key={memory.id}
-                editMode={editMode}
                 detail={detailByMemoryId[memory.id]}
+                editMode={editMode}
                 memory={memory}
                 index={index}
                 onOpenMemory={onOpenMemory}
                 onUpdateMemory={onUpdateMemory}
                 onUploadMemoryImage={onUploadMemoryImage}
+                uploadState={uploadState}
               />
             ))}
           </div>
 
           {filteredMemories.length === 0 && (
             <div className="rounded-[28px] border border-dashed border-[#f4aac6] bg-white/70 p-8 text-center text-sm font-semibold text-[#9a3869] shadow-[0_18px_50px_rgba(204,84,128,0.1)]">
-              还没有这一类回忆。
+              这里还没有回忆，要不要一起写下第一条？
             </div>
           )}
         </div>
@@ -90,7 +92,7 @@ function MemoryTimeline({
             <button
               type="button"
               onClick={onAddMemory}
-              className="inline-flex items-center gap-2 rounded-full bg-[#e94683] px-5 py-3 text-sm font-semibold text-white shadow-[0_14px_28px_rgba(233,70,131,0.28)] transition active:scale-95"
+              className="inline-flex min-h-12 items-center gap-2 rounded-full bg-[#e94683] px-5 text-sm font-semibold text-white shadow-[0_14px_28px_rgba(233,70,131,0.28)] transition active:scale-95"
             >
               添加一张回忆卡片
             </button>

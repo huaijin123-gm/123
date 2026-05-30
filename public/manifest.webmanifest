@@ -1,0 +1,18 @@
+{
+  "name": "我们的时间博物馆",
+  "short_name": "时间博物馆",
+  "description": "两个人共同收藏回忆的私密数字空间",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#fff7fb",
+  "theme_color": "#e94683",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

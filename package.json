@@ -1,16 +1,14 @@
 {
   "type": "module",
   "scripts": {
-    "dev": "concurrently \"node server/index.js\" \"vite --host 0.0.0.0\"",
+    "dev": "vite --host 0.0.0.0",
     "build": "vite build",
-    "preview": "vite preview",
-    "start": "node server/index.js"
+    "preview": "vite preview"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.106.2",
     "@tailwindcss/vite": "^4.1.8",
-    "concurrently": "^9.1.2",
-    "express": "^4.21.2",
+    "heic2any": "^0.0.4",
     "lucide-react": "^0.511.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",

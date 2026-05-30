@@ -12,7 +12,9 @@ export const supabase = hasSupabaseConfig
       auth: {
         persistSession: true,
         autoRefreshToken: true,
-        detectSessionInUrl: true,
+        detectSessionInUrl: false,
+        flowType: "pkce",
+        storageKey: "time-museum-auth",
       },
       realtime: {
         params: {

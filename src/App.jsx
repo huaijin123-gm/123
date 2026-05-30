@@ -6,6 +6,7 @@ import Confession from "./components/Confession";
 import CustomModules from "./components/CustomModules";
 import FutureMailbox from "./components/FutureMailbox";
 import Hero from "./components/Hero";
+import HomeDashboard from "./components/HomeDashboard";
 import MemoryDetail from "./components/MemoryDetail";
 import MemoryTimeline from "./components/MemoryTimeline";
 import MuseumWelcome from "./components/MuseumWelcome";
@@ -107,7 +108,12 @@ function App() {
 
   if (!cloud.session) {
     return (
-      <AuthEntrance onSignIn={cloud.signIn} syncStatus={cloud.syncStatus} />
+      <AuthEntrance
+        authNotice={cloud.authNotice}
+        onRequestOtp={cloud.requestEmailOtp}
+        onVerifyOtp={cloud.verifyEmailOtp}
+        syncStatus={cloud.syncStatus}
+      />
     );
   }
 
@@ -123,12 +129,14 @@ function App() {
   }
 
   return (
-    <main className="min-h-screen overflow-hidden bg-[#fff7fb] pb-24 text-[#3f2633]">
+    <main className="min-h-screen overflow-x-hidden bg-[#fff7fb] pb-28 text-[#3f2633]">
       <Hero
         editMode={editMode}
         siteText={siteText}
         onUpdateSiteText={updateSiteText}
       />
+
+      <HomeDashboard memories={cloud.memories} onAddMemory={cloud.addMemory} />
 
       <MemoryTimeline
         detailByMemoryId={cloud.detailByMemoryId}
@@ -138,6 +146,7 @@ function App() {
         onOpenMemory={(memory) => setSelectedMemoryId(memory.id)}
         onUpdateMemory={cloud.updateMemory}
         onUploadMemoryImage={cloud.uploadMemoryImage}
+        uploadState={cloud.uploadState}
       />
 
       <AchievementWall achievements={defaultContent.achievements} />
@@ -169,6 +178,7 @@ function App() {
         notice={cloud.notice}
         role={cloud.role}
         syncStatus={cloud.syncStatus}
+        uploadState={cloud.uploadState}
         onAddLetter={cloud.addLetter}
         onAddMemory={cloud.addMemory}
         onCreateInvite={cloud.createInvite}

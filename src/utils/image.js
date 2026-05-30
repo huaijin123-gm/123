@@ -31,6 +31,7 @@ export async function resizeImageFile(file) {
     return null;
   }
 
+  let sourceFile = file;
   const lowerName = file.name.toLowerCase();
   if (
     file.type === "image/heic" ||
@@ -38,13 +39,24 @@ export async function resizeImageFile(file) {
     lowerName.endsWith(".heic") ||
     lowerName.endsWith(".heif")
   ) {
-    throw new Error("HEIC_PHOTO");
+    const { default: heic2any } = await import("heic2any");
+    const converted = await heic2any({
+      blob: file,
+      toType: "image/jpeg",
+      quality: 0.86,
+    });
+    const blob = Array.isArray(converted) ? converted[0] : converted;
+    sourceFile = new File([blob], `${lowerName.replace(/\.[^.]+$/, "")}.jpg`, {
+      type: "image/jpeg",
+      lastModified: Date.now(),
+    });
   }
 
-  const dataUrl = await resizeImage(file);
+  const dataUrl = await resizeImage(sourceFile);
   const response = await fetch(dataUrl);
   const blob = await response.blob();
-  const safeName = lowerName.replace(/\.[^.]+$/, "") || "memory-photo";
+  const safeName =
+    sourceFile.name.toLowerCase().replace(/\.[^.]+$/, "") || "memory-photo";
 
   return new File([blob], `${safeName}.jpg`, {
     type: "image/jpeg",

@@ -3,7 +3,7 @@ import InlineEditable from "./InlineEditable";
 
 function Hero({ editMode, siteText, onUpdateSiteText }) {
   return (
-    <section className="relative flex min-h-[92vh] items-center justify-center px-5 py-16 text-center sm:px-8">
+    <section className="relative flex min-h-[88vh] items-center justify-center px-5 py-16 text-center sm:px-8">
       <div className="absolute inset-0 hero-scene" aria-hidden="true" />
 
       <div className="relative z-10 mx-auto flex max-w-4xl flex-col items-center">
@@ -13,7 +13,7 @@ function Hero({ editMode, siteText, onUpdateSiteText }) {
             editMode={editMode}
             value={siteText.heroBadge}
             onChange={(value) => onUpdateSiteText("heroBadge", value)}
-            placeholder="小标签"
+            placeholder="小标题"
           />
         </div>
 
@@ -37,24 +37,24 @@ function Hero({ editMode, siteText, onUpdateSiteText }) {
 
         <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row">
           <a
-            href="#timeline"
-            className="hero-primary-link inline-flex items-center gap-2 rounded-full px-6 py-3 text-base font-semibold text-white transition hover:-translate-y-0.5 active:scale-95"
+            href="#home"
+            className="hero-primary-link inline-flex min-h-12 items-center gap-2 rounded-full px-6 text-base font-semibold text-white transition hover:-translate-y-0.5 active:scale-95"
           >
             <CalendarHeart size={19} />
-            开始参观
+            进入今天
           </a>
           <a
-            href="#letters"
-            className="hero-secondary-link inline-flex items-center gap-2 rounded-full px-6 py-3 text-base font-semibold transition hover:-translate-y-0.5 active:scale-95"
+            href="#timeline"
+            className="hero-secondary-link inline-flex min-h-12 items-center gap-2 rounded-full px-6 text-base font-semibold transition hover:-translate-y-0.5 active:scale-95"
           >
-            先看未来信箱
+            参观时间轴
           </a>
         </div>
       </div>
 
       <a
-        href="#timeline"
-        aria-label="前往时间轴"
+        href="#home"
+        aria-label="前往首页"
         className="hero-scroll-link absolute bottom-8 left-1/2 z-10 -translate-x-1/2 rounded-full p-3 transition"
       >
         <ChevronDown className="animate-bounce" size={22} />

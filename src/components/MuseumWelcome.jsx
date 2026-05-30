@@ -41,7 +41,7 @@ function MuseumWelcome({ loading, onCreateMuseum, onJoinMuseum, syncStatus }) {
             开始布置我们的博物馆
           </h1>
           <p className="mt-4 leading-7 text-[#71364f]">
-            第一个进入的人会成为馆长，然后把邀请链接发给另一个人。
+            第一个进入的人会成为馆长，然后把邀请链接发给另一个人。一个空间默认只允许两个人进入。
           </p>
 
           <div className="mt-8 grid gap-3">
@@ -50,9 +50,13 @@ function MuseumWelcome({ loading, onCreateMuseum, onJoinMuseum, syncStatus }) {
                 type="button"
                 disabled={busy || loading}
                 onClick={join}
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-[#e94683] px-5 py-3 text-base font-semibold text-white shadow-[0_16px_34px_rgba(233,70,131,0.32)] transition enabled:active:scale-95 disabled:opacity-70"
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[#e94683] px-5 text-base font-semibold text-white shadow-[0_16px_34px_rgba(233,70,131,0.32)] transition enabled:active:scale-95 disabled:opacity-70"
               >
-                {busy ? <Loader2 size={18} className="animate-spin" /> : <Ticket size={18} />}
+                {busy ? (
+                  <Loader2 size={18} className="animate-spin" />
+                ) : (
+                  <Ticket size={18} />
+                )}
                 接受邀请，进入博物馆
               </button>
             ) : (
@@ -60,9 +64,13 @@ function MuseumWelcome({ loading, onCreateMuseum, onJoinMuseum, syncStatus }) {
                 type="button"
                 disabled={busy || loading}
                 onClick={create}
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-[#e94683] px-5 py-3 text-base font-semibold text-white shadow-[0_16px_34px_rgba(233,70,131,0.32)] transition enabled:active:scale-95 disabled:opacity-70"
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[#e94683] px-5 text-base font-semibold text-white shadow-[0_16px_34px_rgba(233,70,131,0.32)] transition enabled:active:scale-95 disabled:opacity-70"
               >
-                {busy ? <Loader2 size={18} className="animate-spin" /> : <DoorOpen size={18} />}
+                {busy ? (
+                  <Loader2 size={18} className="animate-spin" />
+                ) : (
+                  <DoorOpen size={18} />
+                )}
                 创建我们的双人空间
               </button>
             )}

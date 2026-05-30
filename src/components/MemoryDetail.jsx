@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { MessageCircle, Send, X } from "lucide-react";
+import { useRef, useState } from "react";
+import { ChevronLeft, ChevronRight, MessageCircle, Send, X } from "lucide-react";
 
 function MemoryDetail({
   detail,
@@ -10,6 +10,7 @@ function MemoryDetail({
 }) {
   const [comment, setComment] = useState("");
   const [photoIndex, setPhotoIndex] = useState(0);
+  const touchStartX = useRef(null);
 
   if (!memory) {
     return null;
@@ -24,9 +25,33 @@ function MemoryDetail({
     setComment("");
   }
 
+  function showPrevious() {
+    setPhotoIndex((value) => Math.max(0, value - 1));
+  }
+
+  function showNext() {
+    setPhotoIndex((value) => Math.min(photos.length - 1, value + 1));
+  }
+
+  function handleTouchEnd(event) {
+    if (touchStartX.current === null) {
+      return;
+    }
+
+    const delta = event.changedTouches[0].clientX - touchStartX.current;
+    if (Math.abs(delta) > 44) {
+      if (delta > 0) {
+        showPrevious();
+      } else {
+        showNext();
+      }
+    }
+    touchStartX.current = null;
+  }
+
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-[#3f2633]/42 p-3 backdrop-blur-sm sm:p-5">
-      <section className="mx-auto max-w-4xl overflow-hidden rounded-[30px] bg-[#fff9fc] shadow-[0_28px_90px_rgba(63,38,51,0.32)]">
+      <section className="mx-auto max-w-5xl overflow-hidden rounded-[30px] bg-[#fff9fc] shadow-[0_28px_90px_rgba(63,38,51,0.32)]">
         <header className="flex items-center justify-between gap-3 border-b border-[#ffd8e8] p-4 sm:p-5">
           <div>
             <p className="text-sm font-semibold text-[#d7427c]">{memory.date}</p>
@@ -44,15 +69,46 @@ function MemoryDetail({
           </button>
         </header>
 
-        <div className="grid gap-0 lg:grid-cols-[1.1fr_0.9fr]">
-          <div className="bg-[#ffe6f0] p-3">
+        <div className="grid gap-0 lg:grid-cols-[1.15fr_0.85fr]">
+          <div
+            className="relative bg-[#ffe6f0] p-3"
+            onTouchStart={(event) => {
+              touchStartX.current = event.touches[0].clientX;
+            }}
+            onTouchEnd={handleTouchEnd}
+          >
             <img
               src={currentPhoto.url}
               alt=""
-              className="aspect-[4/3] w-full rounded-[22px] object-cover"
+              loading="eager"
+              className="max-h-[72vh] w-full rounded-[22px] object-contain"
             />
+
             {photos.length > 1 && (
-              <div className="mt-3 flex gap-2 overflow-x-auto">
+              <>
+                <button
+                  type="button"
+                  onClick={showPrevious}
+                  disabled={photoIndex === 0}
+                  aria-label="上一张照片"
+                  className="absolute left-5 top-1/2 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/82 text-[#9a3869] shadow-lg backdrop-blur transition enabled:active:scale-95 disabled:opacity-35"
+                >
+                  <ChevronLeft size={22} />
+                </button>
+                <button
+                  type="button"
+                  onClick={showNext}
+                  disabled={photoIndex === photos.length - 1}
+                  aria-label="下一张照片"
+                  className="absolute right-5 top-1/2 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/82 text-[#9a3869] shadow-lg backdrop-blur transition enabled:active:scale-95 disabled:opacity-35"
+                >
+                  <ChevronRight size={22} />
+                </button>
+              </>
+            )}
+
+            {photos.length > 1 && (
+              <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
                 {photos.map((photo, index) => (
                   <button
                     key={photo.url}
@@ -62,7 +118,12 @@ function MemoryDetail({
                       index === photoIndex ? "border-[#e94683]" : "border-white"
                     }`}
                   >
-                    <img src={photo.url} alt="" className="h-full w-full object-cover" />
+                    <img
+                      src={photo.url}
+                      alt=""
+                      loading="lazy"
+                      className="h-full w-full object-cover"
+                    />
                   </button>
                 ))}
               </div>
@@ -95,7 +156,7 @@ function MemoryDetail({
                 留言
               </p>
 
-              <div className="max-h-48 space-y-3 overflow-y-auto pr-1">
+              <div className="max-h-52 space-y-3 overflow-y-auto pr-1">
                 {detail?.comments?.length ? (
                   detail.comments.map((item) => (
                     <p

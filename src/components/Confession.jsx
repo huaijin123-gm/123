@@ -31,7 +31,7 @@ function Confession({ editMode, siteText, onUpdateSiteText }) {
         <button
           type="button"
           onClick={() => setIsRevealed(true)}
-          className="mt-8 inline-flex items-center gap-2 rounded-full bg-[#e94683] px-7 py-3 text-base font-semibold text-white shadow-[0_18px_35px_rgba(233,70,131,0.32)] transition hover:-translate-y-0.5 hover:bg-[#d93474] active:scale-95"
+          className="mt-8 inline-flex min-h-12 items-center gap-2 rounded-full bg-[#e94683] px-7 text-base font-semibold text-white shadow-[0_18px_35px_rgba(233,70,131,0.32)] transition hover:-translate-y-0.5 hover:bg-[#d93474] active:scale-95"
         >
           <LockKeyholeOpen size={18} />
           打开隐藏告白
